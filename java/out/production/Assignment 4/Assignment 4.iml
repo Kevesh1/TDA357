@@ -10,7 +10,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/postgresql-42.5.4.jar!/" />
+          <root url="jar://$USER_HOME$/Downloads/json-20220924.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -19,7 +19,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/Downloads/json-20220924.jar!/" />
+          <root url="jar://$MODULE_DIR$/JARs/postgresql-42.5.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
