@@ -1,5 +1,6 @@
 
 import java.sql.*; // JDBC stuff.
+import java.util.Objects;
 import java.util.Properties;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -98,11 +99,11 @@ public class PortalConnection {
 
     // Return a JSON document containing lots of information about a student, it should validate against the schema found in information_schema.json
     public String getInfo(String student) throws SQLException{
-        JSONArray informations = new JSONArray();
+        JSONObject information = new JSONObject();
         try(PreparedStatement ps = conn.prepareStatement(
             // replace this with something more useful
             //"SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
-                "SELECT * FROM BasicInformation WHERE idnr=?"
+                "SELECT idnr AS student, name, login, program, branch FROM BasicInformation WHERE idnr=?"
             );){
             ps.setString(1, student);
             ResultSet rs = ps.executeQuery();
@@ -110,18 +111,68 @@ public class PortalConnection {
             int column = rsmd.getColumnCount();
 
             while(rs.next()){
-                JSONObject information = new JSONObject();
                 for (int i = 1; i <= column; i++){
                     String columnName = rsmd.getColumnName(i);
                     information.put(columnName, rs.getString(i));
                 }
-                informations.put(information);
+                //informations.put("a",information);
             }
         }
         try(PreparedStatement ps = conn.prepareStatement(
                 // replace this with something more useful
                 //"SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
-                "SELECT * FROM FinishedCourses WHERE student=?"
+                "SELECT Courses.name AS course, Courses.code,grade,Courses.credits FROM FinishedCourses JOIN Courses ON FinishedCourses.course = Courses.code WHERE student=?"
+        );) {
+            ps.setString(1, student);
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int column = rsmd.getColumnCount();
+
+            JSONArray finishedCourses = new JSONArray();
+
+            while (rs.next()) {
+                JSONObject info = new JSONObject();
+                for (int i = 1; i <= column; i++){
+                    String columnName = rsmd.getColumnName(i);
+
+                    info.put(columnName, rs.getString(i));
+                }
+                finishedCourses.put(info);
+                information.put("finished",finishedCourses);
+            }
+
+        }
+
+        try(PreparedStatement ps = conn.prepareStatement(
+                // replace this with something more useful
+                //"SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
+                "SELECT Courses.code AS code, Courses.name AS course, status FROM Registrations JOIN Courses ON Registrations.course = Courses.code WHERE student=?;"
+        );) {
+            ps.setString(1, student);
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData rsmd = rs.getMetaData();
+            int column = rsmd.getColumnCount();
+
+            JSONArray registration = new JSONArray();
+
+            while (rs.next()) {
+                JSONObject reg = new JSONObject();
+                for (int i = 1; i <= column; i++){
+
+                    String columnName = rsmd.getColumnName(i);
+                    reg.put(columnName, rs.getString(i));
+                }
+                //informations.put("c",information);
+                registration.put(reg);
+                information.put("registered", registration);
+            }
+
+        }
+
+        try(PreparedStatement ps = conn.prepareStatement(
+                // replace this with something more useful
+                //"SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
+                "SELECT totalCredits,mandatoryLeft,mathCredits,researchCredits, seminarCourses, qualified FROM PathToGraduation WHERE student=?"
         );) {
             ps.setString(1, student);
             ResultSet rs = ps.executeQuery();
@@ -130,60 +181,29 @@ public class PortalConnection {
 
 
             while (rs.next()) {
-                JSONObject information = new JSONObject();
                 for (int i = 1; i <= column; i++){
                     String columnName = rsmd.getColumnName(i);
+                    switch (columnName){
+                        case "totalcredits" -> columnName = "totalCredits";
+
+                        case "mandatoryleft" -> columnName = "mandatoryLeft";
+
+                        case "mathcredits" -> columnName = "mathCredits";
+
+                        case "researchcredits" -> columnName = "researchCredits";
+
+                        case "seminarcourses" -> columnName = "seminarCourses";
+
+                        case "qualified" -> columnName = "canGraduate";
+                    }
                     information.put(columnName, rs.getString(i));
                 }
-                informations.put(information);
+                //informations.put("d",information);
             }
 
         }
-
-        try(PreparedStatement ps = conn.prepareStatement(
-                // replace this with something more useful
-                //"SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
-                "SELECT * FROM Registrations WHERE student=?"
-        );) {
-            ps.setString(1, student);
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int column = rsmd.getColumnCount();
-
-
-            while (rs.next()) {
-                JSONObject information = new JSONObject();
-                for (int i = 1; i <= column; i++){
-                    String columnName = rsmd.getColumnName(i);
-                    information.put(columnName, rs.getString(i));
-                }
-                informations.put(information);
-            }
-
-        }
-
-        try(PreparedStatement ps = conn.prepareStatement(
-                // replace this with something more useful
-                //"SELECT jsonb_build_object('student',idnr,'name',name) AS jsondata FROM BasicInformation WHERE idnr=?"
-                "SELECT * FROM PathToGraduation WHERE student=?"
-        );) {
-            ps.setString(1, student);
-            ResultSet rs = ps.executeQuery();
-            ResultSetMetaData rsmd = rs.getMetaData();
-            int column = rsmd.getColumnCount();
-
-
-            while (rs.next()) {
-                JSONObject information = new JSONObject();
-                for (int i = 1; i <= column; i++){
-                    String columnName = rsmd.getColumnName(i);
-                    information.put(columnName, rs.getString(i));
-                }
-                informations.put(information);
-            }
-
-        }
-        return informations.toString();
+        System.out.println(information.toString());
+        return information.toString();
     }
 
     // This is a hack to turn an SQLException into a JSON string error message. No need to change.
