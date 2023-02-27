@@ -41,7 +41,7 @@ public class PortalConnection {
     // Register a student on a course, returns a tiny JSON document (as a String)
     public String register(String student, String courseCode){
 
-        try(PreparedStatement ps = conn.prepareStatement(
+       try(PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO Registrations VALUES (?,?)"
         );){
 
@@ -59,11 +59,18 @@ public class PortalConnection {
 
     // Unregister a student from a course, returns a tiny JSON document (as a String)
     public String unregister(String student, String courseCode){
-        try(PreparedStatement ps = conn.prepareStatement(
+        /*try(PreparedStatement ps = conn.prepareStatement(
                 "DELETE FROM Registrations WHERE student = ? AND course = ?"
         );) {
             ps.setString(1, student);
-            ps.setString(2, courseCode);
+            ps.setString(2, courseCode);*/
+
+        try(Statement s = conn.createStatement();){
+
+            String query = "DELETE FROM Registrations WHERE student =' "+student+"'";
+            //System.out.println(rs);
+
+
 
             int preDeleteCount;
             try (PreparedStatement preCount = conn.prepareStatement(
@@ -73,7 +80,7 @@ public class PortalConnection {
                 count.next();
                 preDeleteCount = count.getInt(1);
             }
-            ps.executeUpdate();
+            s.executeUpdate(query);
 
             int postDeleteCount;
             try (PreparedStatement postCount = conn.prepareStatement(
