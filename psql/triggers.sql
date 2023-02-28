@@ -72,16 +72,12 @@ BEGIN
                 END IF;
             END IF;
         END IF;   
-        RETURN NULL;
     --If student is on waiting list
     ELSIF EXISTS(SELECT * FROM WaitingList WHERE student = OLD.student AND course = OLD.course) THEN
         DELETE FROM WaitingList WHERE student = OLD.student AND course = OLD.course;
         RAISE NOTICE 'Student % was removed from the waiting list %', OLD.student, OLD.course;
-        RETURN NULL;
-    --ELSE 
-    --    RAISE EXCEPTION 'Student % does not exist or is not registered for the course: %', OLD.student, OLD.course;
-    --    RETURN NULL;
     END IF;
+    RETURN NULL;
 END;
 $$ LANGUAGE plpgsql;
 

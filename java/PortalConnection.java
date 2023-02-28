@@ -67,7 +67,8 @@ public class PortalConnection {
 
         try(Statement s = conn.createStatement();){
 
-            String query = "DELETE FROM Registrations WHERE student =' "+student+"'";
+            String query = "DELETE FROM Registrations WHERE student =' "+student+"' AND course = '"+courseCode+"'";
+
             //System.out.println(rs);
 
 
