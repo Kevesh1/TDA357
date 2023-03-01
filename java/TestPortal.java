@@ -53,8 +53,11 @@ public class TestPortal {
           //Unregister a student from an overfull course and check that no students was moved
           //from the waiting list to being registered
           System.out.println(c.unregister("1111111111", "CCC222"));
+          pause();
 
           //Unregister with the introduced SQL injection, causing all registrations to dissappear
+          System.out.println(c.unregister("2222222222","c' OR 'x'='x"));
+          pause();
 
 
 
