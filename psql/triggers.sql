@@ -21,10 +21,18 @@ BEGIN
         RETURN NULL;
     END IF;
 
+    -- Check if course is already passed
+    IF EXISTS (SELECT * FROM PassedCourses WHERE student = NEW.student AND course = NEW.course) THEN 
+        RAISE EXCEPTION 'Student % has already passed this course', NEW.student;
+        RETURN NULL;
+    END IF;
+
     --Check if course has prerequisities
     IF EXISTS (SELECT * FROM Prerequisities WHERE course = NEW.course) THEN
         --Check if prerequisites courses are read
-        IF NOT (SELECT course FROM PassedCourses WHERE student = NEW.student) IN (SELECT passed FROM Prerequisities WHERE course = NEW.course) THEN 
+        IF EXISTS (SELECT passed FROM Prerequisities WHERE course = NEW.course 
+                  EXCEPT 
+                   SELECT course FROM PassedCourses WHERE student = NEW.student) THEN
             RAISE EXCEPTION 'Student % not eligible to read the course: %', NEW.student ,NEW.course;
             RETURN NULL;
         END IF;

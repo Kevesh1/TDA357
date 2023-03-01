@@ -18,6 +18,7 @@ SET client_min_messages TO NOTICE; -- More talk
 \ir tables.sql
 \ir inserts.sql
 \ir views.sql
+\ir triggers.sql
 
 
 

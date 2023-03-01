@@ -4,11 +4,11 @@
 INSERT INTO Registrations VALUES ('6666666666', 'CCC444'); 
 
 -- TEST #2: registered to a limited course;.
--- EXPECTED OUTCOME: Student put on waiting list
-INSERT INTO Registrations VALUES ('6666666666', 'CCC333'); 
+-- EXPECTED OUTCOME: Pass
+INSERT INTO Registrations VALUES ('6666666666', 'CCC555'); 
 
 -- TEST #3: waiting for a limited course;.
--- EXPECTED OUTCOME: Student put on waiting list
+-- EXPECTED OUTCOME: Pass
 INSERT INTO Registrations VALUES ('6666666666', 'CCC222'); 
 
 -- TEST #4: removed from a waiting list (with additional students in it). 
@@ -42,4 +42,26 @@ DELETE FROM Registrations WHERE student = '6666666666' AND course = 'CCC222';
 DELETE FROM Registrations WHERE student = '1111111111' AND course = 'CCC222';
 
 
+INSERT INTO Registered VALUES ('1111111111', 'CCC111');
+-- TEST #10: register student to a course it is registered for
+-- EXPECTED OUTCOME: Fail
+INSERT INTO Registrations VALUES ('1111111111', 'CCC111');
+
+-- TEST #11: register student to a course it is in the waiting list for
+-- EXPECTED OUTCOME: Fail
+INSERT INTO Registrations VALUES ('3333333333', 'CCC222');
+
+-- TEST #12: register student that does not exist
+-- EXPECTED OUTCOME: Fail
+INSERT INTO Registrations VALUES ('333', 'CCC222');
+
+INSERT INTO Prerequisities VALUES ('CCC111', 'CCC444')
+-- TEST #13: register student to a course that is not eligeble to read it
+-- EXPECTED OUTCOME: Fail
+DELETE FROM Taken WHERE student = '4444444444' AND course = 'CCC111';
+INSERT INTO Registrations VALUES ('4444444444', 'CCC111');
+
+-- TEST #14: register student to a course they have already passed
+-- EXPECTED OUTCOME: Fail
+INSERT INTO Registrations VALUES ('4444444444', 'CCC111');
 
